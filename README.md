@@ -49,3 +49,7 @@ Example:
 
 	});
 ```
+
+## Using with MailChimp
+
+See this for help onsending a MailChimp to thier server via JSON: http://stackoverflow.com/questions/8425701/ajax-mailchimp-signup-form-integration
