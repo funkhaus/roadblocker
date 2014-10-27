@@ -21,6 +21,17 @@ var roadblocker = {
 		jQuery(document).on( 'roadblock.submitted', function(){
 			roadblocker.onSubmit()			
 		});
+		
+		// Uncomment to delete cookies (good for testing)
+		/*
+		jQuery.removeCookie('roadblock_close_count', { 
+			path: '/'
+		});			
+		jQuery.removeCookie('roadblock_disabled', {
+			path: '/'
+		});
+		*/
+
     },
     
     onClose: function(){
@@ -39,17 +50,17 @@ var roadblocker = {
 		} else {
 			cookieCloseCount++;
 		}
-
+		
 		// Incrment close count, and save
 		jQuery.cookie('roadblock_close_count', cookieCloseCount, { 
-			expires: roadblocker_vars.closeDaysCount,
+			expires: roadblocker.closeDaysCount,
 			path: '/'
 		});	
 		
 		// If closed more times than settings, disable roadblock for X days.
-		if( cookieCloseCount >= roadblocker_vars.closeCount ) {
+		if( cookieCloseCount >= roadblocker.closeCount ) {
 			jQuery.cookie('roadblock_disabled', true, {
-				expires: roadblocker_vars.closeDaysCount,
+				expires: roadblocker.closeDaysCount,
 				path: '/'
 			});
 		}
@@ -63,7 +74,7 @@ var roadblocker = {
 
 		// Disable roadblock for X days
 		jQuery.cookie('roadblock_disabled', true, { 
-			expires: roadblocker_vars.submitDaysCount,
+			expires: roadblocker.submitDaysCount,
 			path: '/'
 		});
 
