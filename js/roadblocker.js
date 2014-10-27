@@ -46,7 +46,7 @@ var roadblocker = {
 
 		// Set default, if no cookie present
 		if( typeof cookieCloseCount === 'undefined' ) {
-			cookieCloseCount = 0;
+			cookieCloseCount = 1;
 		} else {
 			cookieCloseCount++;
 		}
