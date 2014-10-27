@@ -101,7 +101,7 @@
 			return true;
 		}
 
-		// Abort if cookie says so (has closed a certain amount of times, or submitted
+		// Abort if cookie says so (has closed a certain amount of times, or for has been submitted)
 		if( $_COOKIE['roadblock_disabled'] ) {
 			return false;			
 		}
