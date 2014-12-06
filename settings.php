@@ -58,10 +58,8 @@
 						<?php if( !empty($templates) ) : ?>
 							<select name="roadblocker_template">
 
-								<?php if( get_option('roadblocker_template') === false ) : ?>
-									<option value="" selected></option>
-								<?php endif; ?>
-
+								<option value="none" <?php selected( get_option('roadblocker_template'), 'none'); ?> >None</option>
+								
 								<?php foreach ( $templates as $path ) : ?>
 									<?php $filename = basename($path, '.php'); ?>
 									<option value="<?php echo $filename; ?>" <?php selected( get_option('roadblocker_template'), $filename); ?>><?php echo $filename; ?></option>
@@ -72,7 +70,25 @@
 						<?php endif; ?>
 					</td>
 				</tr>
-				
+
+
+				<tr valign="top">
+					<th scope="row"><label>Reset tracking for active template</label></th>
+					<td>
+						<?php
+							$reset_tracking = get_option('roadblocker_reset_tracking', 0);
+						?>
+						<fieldset>
+							<p>
+								<label><input type="checkbox" name="roadblocker_reset_tracking" value="1">Yes</label><br>
+							</p>
+							<p class="description">This will reset tracking for the active template only.</p>
+						</fieldset>
+		
+					</td>
+				</tr>
+								
+
 				<tr valign="top">
 					<th scope="row"><label>Force roadblock on</label></th>
 					<td>
@@ -84,7 +100,7 @@
 								<label><input type="radio" name="roadblocker_force_display" value="0" <?php checked( $force_display, 0 ); ?>>No</label><br>
 								<label><input type="radio" name="roadblocker_force_display" value="1" <?php checked( $force_display, 1 ); ?>>Yes</label>
 							</p>
-							<p class="description">This will disable tracking, the roadblock will be shown regardless of exsiting cookie states.</p> 
+							<p class="description">This will disable tracking, the roadblock will be shown regardless of existing cookie states.</p> 
 							<p class="description">Useful for testing or high traffic days.</p>
 						</fieldset>
 					</td>
@@ -93,9 +109,7 @@
 			</tbody>
 		</table>		
 		
-		<p class="submit">
-			<input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-		</p>							
+		<?php submit_button(); ?>
 		
 	</form>
 	

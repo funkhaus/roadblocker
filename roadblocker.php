@@ -30,22 +30,6 @@
 	add_action('admin_menu','roadblocker_add_menu_settings');
 
 
-/* 
- * Register Takeover Settings 
- */
-	function roadblocker_settings_init(){
-		register_setting('roadblocker_settings', 'roadblocker_close_count');
-		register_setting('roadblocker_settings', 'roadblocker_close_days_count');
-		register_setting('roadblocker_settings', 'roadblocker_submit_days_count');
-		register_setting('roadblocker_settings', 'roadblocker_overlay_location');
-		register_setting('roadblocker_settings', 'roadblocker_template');
-		register_setting('roadblocker_settings', 'roadblocker_force_display');		
-	}
-	add_action('admin_init', 'roadblocker_settings_init');
-
-
-
-	
 /*
  * Enqueue Custom Scripts
  */
@@ -55,19 +39,63 @@
 
         wp_enqueue_script('jquery.cookie', 'jquery');
         wp_enqueue_script('roadblocker', 'jquery');
-
+		
+		// Get timestamp for injection in JS
+		$template_name = get_option('roadblocker_template');		
+		$timestamp_key = 'roadblocker_'.$template_name.'_timestamp';
+		$timestamp = get_option($timestamp_key);
+		
         // Setup JS variables in scripts        
 		wp_localize_script('roadblocker', 'roadblocker_vars', 
 			array(
 				'closeCount' 		=> get_option('roadblocker_close_count', 3),
 				'closeDaysCount'  	=> get_option('roadblocker_close_days_count', 30),
 				'submitDaysCount'	=> get_option('roadblocker_submit_days_count', 365),
-				'forceDisplay'		=> get_option('roadblocker_force_display', 0)
+				'forceDisplay'		=> get_option('roadblocker_force_display', 0),
+				'activeTemplate'	=> get_option('roadblocker_template', 'none'),
+				'activeTimestamp'	=> $timestamp
 			)
 		);
 
     }
     add_action('wp_enqueue_scripts', 'roadblocker_scripts', 20);
+
+
+/* 
+ * Register Takeover Settings 
+ */
+	function roadblocker_settings_init(){
+		register_setting('roadblocker_settings', 'roadblocker_close_count');
+		register_setting('roadblocker_settings', 'roadblocker_close_days_count');
+		register_setting('roadblocker_settings', 'roadblocker_submit_days_count');
+		register_setting('roadblocker_settings', 'roadblocker_overlay_location');
+		register_setting('roadblocker_settings', 'roadblocker_template');
+		register_setting('roadblocker_settings', 'roadblocker_reset_tracking');
+		register_setting('roadblocker_settings', 'roadblocker_force_display');
+	}
+	add_action('admin_init', 'roadblocker_settings_init');
+
+
+
+/* 
+ * These run when options are saved
+ */	
+	function roadblocker_save_settings() {
+		
+		// Get template name
+		if( isset($_POST['roadblocker_template']) ){
+			$template_name = $_POST['roadblocker_template'];			
+			
+			// Save time stamp for active template
+			if( $_POST['roadblocker_reset_tracking'] ) {
+				$key = 'roadblocker_'.$template_name.'_timestamp';
+				delete_option($key);
+				add_option( $key, time() );
+			}
+		}
+	}
+	add_action('update_option', 'roadblocker_save_settings');
+
 
 
 
@@ -92,7 +120,25 @@
 		// Get setting of where to display
 		$location = get_option('roadblocker_overlay_location', 'is_home');
 
-		// Get force display and cooie values
+		// Get template timestamp setting
+		$timestamp_key = 'roadblocker_'.$template_name.'_timestamp';
+		$timestamp = get_option($timestamp_key);
+		
+		// Get timestamp from cookie
+		if( isset($_COOKIE[$timestamp_key]) ){
+			$cookieTimestamp = $_COOKIE[$timestamp_key];
+		} else {
+			$cookieTimestamp = 0;
+		}
+		
+		// Get disabled status from cookie (this means the roadblock was submitted once already)
+		if( isset($_COOKIE['roadblocker_'.$template_name.'_disabled']) ){
+			$disabled = $_COOKIE['roadblocker_'.$template_name.'_disabled'];			
+		} else {
+			$disabled = false;
+		}
+
+		// Get force display setting
 		$force_display = get_option('roadblocker_force_display', 0);
 
 		// Always show Roadblock if forse_display setting is true.
@@ -100,9 +146,23 @@
 			roadblocker_include_file($filepath);				
 			return true;
 		}
+		
+		// If server timestamp is less than the cookie timestamp, don't show the roadblock
+		if( $timestamp < $cookieTimestamp ) {
+			return false;
+		}
+		
+		// Should we respect the cookies disabled value? 
+		if($cookieTimestamp < $timestamp){
+			// Server has been reset, so ignore the disabled value.
+			$disabled = false;
+			
+			// Expire cookie
+			setcookie($timestamp_key, '', time() - 3600);			
+		}
 
-		// Abort if cookie says so (has closed a certain amount of times, or for has been submitted)
-		if( $_COOKIE['roadblock_disabled'] ) {
+		// Abort if cookie says so (has closed a certain amount of times, or has been submitted)
+		if( $disabled ) {
 			return false;			
 		}
 

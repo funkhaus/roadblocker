@@ -34,7 +34,7 @@ Example:
 		jQuery('#roadblock-overlay').fadeOut();
 		
 		// Send the roadblock.closed event
-		jQuery(this).trigger('roadblock.closed');
+		jQuery(this).trigger('roadblocker.closed');
 
 	});
 	
@@ -45,7 +45,7 @@ Example:
 		jQuery('#roadblock-overlay').fadeOut();
 		
 		// Send the roadblock.submitted event
-		jQuery(this).trigger('roadblock.submitted');
+		jQuery(this).trigger('roadblocker.submitted');
 
 	});
 ```
