@@ -3,7 +3,7 @@
  * Plugin Name: Roadblocker
  * Plugin URI:  http://funkhaus.us/
  * Description: Display a roadblock overlay
- * Version:     1.0
+ * Version:     1.1
  * Author:      Drew Baker, John Robson, Funkhaus
  * Author URI:  http://funkhaus.us
  */
@@ -125,6 +125,9 @@
  */
 	function roadblocker_insert_template() {
     	
+    	// Reset post data
+        wp_reset_postdata();
+    	
 		// Get selected template
 		$template_name = get_option('roadblocker_template');
 		$filepath = get_stylesheet_directory().'/roadblocks/'.$template_name.'.php';
@@ -217,12 +220,7 @@
 		if( $force_display ) {
 			return true;
 		}
-		
-		// If server timestamp is less than the cookie timestamp, don't show the roadblock
-		if( $timestamp < $cookieTimestamp ) {
-			return false;
-		}
-		
+
 		// Should we respect the cookies disabled value? 
 		if($cookieTimestamp < $timestamp){
 			// Server has been reset, so ignore the disabled value.
@@ -264,5 +262,3 @@
 		}
 
 	}
-
-?>

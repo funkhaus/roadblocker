@@ -53,3 +53,9 @@ Example:
 ## Using with MailChimp
 
 See this for help onsending a MailChimp to thier server via JSON: http://stackoverflow.com/questions/8425701/ajax-mailchimp-signup-form-integration
+
+## Changelog
+
+1.1 - Added session override to disable caching on roadblock pages on Flywheel hosting
+
+1.0 - Initial release
