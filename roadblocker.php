@@ -108,92 +108,33 @@
 	}
 
 
+/*
+ * Start a session, used to force disable cache
+ */
+    function roadblocker_start_session(){
+        if(!session_id()) {
+            session_start();       
+        }        
+    }
+    add_action( 'init', 'roadblocker_start_session' ); 
+
+
 	
 /*
  * Insert selected template HTML/PHP into footer
  */
 	function roadblocker_insert_template() {
+    	
 		// Get selected template
 		$template_name = get_option('roadblocker_template');
 		$filepath = get_stylesheet_directory().'/roadblocks/'.$template_name.'.php';
-
-		// Get setting of where to display
-		$location = get_option('roadblocker_overlay_location', 'is_home');
-
-		// Get template timestamp setting
-		$timestamp_key = 'roadblocker_'.$template_name.'_timestamp';
-		$timestamp = get_option($timestamp_key);
-		
-		// Get timestamp from cookie
-		if( isset($_COOKIE[$timestamp_key]) ){
-			$cookieTimestamp = $_COOKIE[$timestamp_key];
-		} else {
-			$cookieTimestamp = 0;
-		}
-		
-		// Get disabled status from cookie (this means the roadblock was submitted once already)
-		if( isset($_COOKIE['roadblocker_'.$template_name.'_disabled']) ){
-			$disabled = $_COOKIE['roadblocker_'.$template_name.'_disabled'];			
-		} else {
-			$disabled = false;
-		}
-
-		// Get force display setting
-		$force_display = get_option('roadblocker_force_display', 0);
-
-		// Always show Roadblock if forse_display setting is true.
-		if( $force_display ) {
-			roadblocker_include_file($filepath);				
-			return true;
-		}
-		
-		// If server timestamp is less than the cookie timestamp, don't show the roadblock
-		if( $timestamp < $cookieTimestamp ) {
-			return false;
-		}
-		
-		// Should we respect the cookies disabled value? 
-		if($cookieTimestamp < $timestamp){
-			// Server has been reset, so ignore the disabled value.
-			$disabled = false;
-			
-			// Expire cookie
-			setcookie($timestamp_key, '', time() - 3600);			
-		}
-
-		// Abort if cookie says so (has closed a certain amount of times, or has been submitted)
-		if( $disabled ) {
-			return false;			
-		}
-
-		// Finally, figure out where/when to include template HTML based on settings
-		switch (true) {
-		    case $location == 'any' :
-
-				// Include file if it exists 
-				roadblocker_include_file($filepath);
-		        break;
-
-		    case $location == 'second_page' :
-
-				if( roadblocker_previous_page_was_same_domain() ) {
-					// Only show the roadblock if referrer URL is this site
-					roadblocker_include_file($filepath);
-				}
-		        break;
-
-		    default :
-		    
-				wp_reset_postdata();
-				// Get setting value and use that as a function ( like is_home() )
-				if( call_user_func($location) ) {
-					roadblocker_include_file($filepath);
-				}
-		        break;
-		}
+        
+        if( roadblocker_conditonal_display_roadblock() ) {
+            roadblocker_include_file($filepath);
+        }
 	}
-	add_action('wp_footer', 'roadblocker_insert_template'); 	
-	
+	add_action('wp_footer', 'roadblocker_insert_template');
+
 
 
 /*
@@ -236,6 +177,92 @@
 		} else {
 			return false;
 		}		
+	}
+	
+
+/*
+ * Conditonal - Determine if roadblock should be displayed
+ */	
+	function roadblocker_conditonal_display_roadblock() {
+
+		// Get selected template
+		$template_name = get_option('roadblocker_template');
+		$filepath = get_stylesheet_directory().'/roadblocks/'.$template_name.'.php';
+
+		// Get setting of where to display
+		$location = get_option('roadblocker_overlay_location', 'is_home');
+
+		// Get template timestamp setting
+		$timestamp_key = 'roadblocker_'.$template_name.'_timestamp';
+		$timestamp = get_option($timestamp_key);
+		
+		// Get timestamp from cookie
+		if( isset($_COOKIE[$timestamp_key]) ){
+			$cookieTimestamp = $_COOKIE[$timestamp_key];
+		} else {
+			$cookieTimestamp = 0;
+		}
+		
+		// Get disabled status from cookie (this means the roadblock was submitted once already)
+		if( isset($_COOKIE['roadblocker_'.$template_name.'_disabled']) ){
+			$disabled = $_COOKIE['roadblocker_'.$template_name.'_disabled'];			
+		} else {
+			$disabled = false;
+		}
+
+		// Get force display setting
+		$force_display = get_option('roadblocker_force_display', 0);
+
+		// Always show Roadblock if force_display setting is true.
+		if( $force_display ) {
+			return true;
+		}
+		
+		// If server timestamp is less than the cookie timestamp, don't show the roadblock
+		if( $timestamp < $cookieTimestamp ) {
+			return false;
+		}
+		
+		// Should we respect the cookies disabled value? 
+		if($cookieTimestamp < $timestamp){
+			// Server has been reset, so ignore the disabled value.
+			$disabled = false;
+			
+			// Expire cookie
+			setcookie($timestamp_key, '', time() - 3600);			
+		}
+
+		// Abort if cookie says so (has closed a certain amount of times, or has been submitted)
+		if( $disabled ) {
+			return false;			
+		}
+
+		// Finally, figure out where/when to include template HTML based on settings
+		switch (true) {
+
+		    case $location == 'any' :
+                
+                return true;
+		        break;
+
+		    case $location == 'second_page' :
+
+				if( roadblocker_previous_page_was_same_domain() ) {
+                    return true;
+				}
+		        break;
+
+		    default :
+
+				// Get setting value and use that as a function ( like is_home() )
+				if( call_user_func($location) ) {
+                    return true;
+				} else {
+    				return false;
+				}
+		        break;
+		}
+
 	}
 
 ?>
