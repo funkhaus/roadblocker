@@ -32,7 +32,8 @@ $('.selector').roadblocker({
     ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
     closeButton: '.roadblock-close', // Selector for the element used to close the roadblock. Searches the roadblock's children first, then the rest of the document.
     signupButton: '.roadblock-permanent-hide' // Selector for the element used to prevent the roadblock from ever appearing again (ie, the 'sign up' button for a mailing list)
-});```
+});
+```
 
 ####Under The Hood
 
