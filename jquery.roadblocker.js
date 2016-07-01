@@ -13,8 +13,8 @@
             totalTimesToShow: 3,
             waitTime: 10000,
             ignorePaths: ['/'],
-            singleCloseButton: '.close-roadblock',
-            permanentCloseButton: '.signup',
+            singleCloseButton: '.roadblock-close',
+            permanentCloseButton: '.roadblock-permanent-hide',
             onRoadblockAppear: null
         }, options);
 
