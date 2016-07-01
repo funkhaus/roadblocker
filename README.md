@@ -4,12 +4,35 @@ roadblock-js
 ####What
 jQuery plugin to show a DIV after a certain amount of time on a site. The div will be shown X amount of times during a session (from when the user first accesses the site to when they close the browser) and Y amount of times total. There will also be a list of URL pathnames to ignore.
 
+Definitions of terms: 
+
+`roadblock` - the jQuery element that will appear when correct conditions are met.
+
+`session` - From the first time a `roadblocker-session` cookie is created until the user closes their browser.
+
 ####How
-Pick your level of customization:
+Include jQuery first, then include jquery.roadblocker.js:
+
+```html
+<script src="path/to/jquery"></script>
+<script src="path/to/roadblocker"></script>
+```
+
+Then, pick your level of customization:
 
 `$('.selector').roadblocker();`
 
 Default options.
+
+```javascript
+$('.selector').roadblocker({
+    timesPerSession: 1, // Maximum number of times to show roadblock during session
+    totalTimesToShow: 3, // Maxiumum number of times to show roadblock ever
+    waitTime: 10000, // How long to wait before roadblock action is triggered
+    ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
+    closeButton: '.roadblock-close', // Selector for the element used to close the roadblock. Searches the roadblock's children first, then the rest of the document.
+    signupButton: '.roadblock-permanent-hide' // Selector for the element used to prevent the roadblock from ever appearing again (ie, the 'sign up' button for a mailing list)
+});```
 
 ####Under The Hood
 
