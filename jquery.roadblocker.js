@@ -13,13 +13,91 @@
             totalTimesToShow: 3,
             waitTime: 10000,
             ignorePaths: ['/'],
-            closeButton: '.close-roadblock',
-            signupButton: '.signup'
+            singleCloseButton: '.close-roadblock',
+            permanentCloseButton: '.signup',
+            onRoadblockAppear: null
         }, options);
 
+        var permanentCookie = 'roadblocker-permanent';
+        var sessionCookie = 'roadblocker-session';
+        var timesDisplayed = 'timesDisplayed=';
+        var neverShow = 'neverShow';
+
         return this.each(function() {
-            var closeButton;
-            submitButton = submitButton || $('')
+            // Hide roadblock
+            $(this).css('display', 'none');
+
+            var timesDisplayedThisSession = 0, timesDisplayedAllTime = 0;
+
+            // Look for roadblocker-session
+            var session = Cookies.get(sessionCookie);
+            if ( session != undefined ) {
+                // Has the roadblock been displayed enough times this session?
+                timesDisplayedThisSession = session.match(/timesDisplayed=(\d*)/)[1];
+                timesDisplayedThisSession = parseInt(timesDisplayedThisSession);
+                // Also, does the session cookie have the 'neverShow' flag?
+                if (timesDisplayedThisSession >= settings.timesPerSession || session.includes(neverShow)) {
+                    return;
+                }
+            }
+
+            // Look for roadblocker-permanent
+            var permanent = Cookies.get(permanentCookie);
+            if ( permanent != undefined ) {
+                if ( permanent.includes(neverShow) ) {
+                    return;
+                }
+            }
+
+            // Check pathname
+            var pathname = location.pathname;
+            for (var i = 0; i < settings.ignorePaths.length; i++) {
+                if ( settings.ignorePaths[i] == pathname ) {
+                    return;
+                }
+            }
+
+            // Create cookies if necessary
+            if ( session == undefined ) {
+                session = Cookies.set(sessionCookie, timesDisplayed + '0');
+            }
+            if ( permanent == undefined ) {
+                permanent = Cookies.set(permanentCookie, timesDisplayed + '0');
+            }
+
+            // Set up close button
+            var $closeButton = $(this).children(settings.singleCloseButton);
+            // Search DOM if child closeButton isn't found
+            if ( ! $closeButton.length ) $closeButton = $(settings.singleCloseButton);
+            // Increment roadblocker-session and roadblocker-permanent counts on close button click
+            $closeButton.on('click', function() {
+                timesDisplayedThisSession++;
+                timesDisplayedAllTime++;
+                Cookies.set(sessionCookie, session.replace(/(timesDisplayed=\d)/, timesDisplayed + timesDisplayedThisSession));
+                Cookies.set(permanentCookie, permanent.replace(/(timesDisplayed=\d)/, timesDisplayed + timesDisplayedThisSession));
+            });
+
+            // Set up permanent close button
+            var $permanentClose = $(this).children(settings.permanentCloseButton);
+            // Search DOM if child permanent close button isn't found
+            if ( ! $permanentClose.length ) $permanentClose = $(settings.permanentCloseButton);
+            // Add 'never-show' flag to cookies on permanentClose click
+            $permanentClose.on('click', function() {
+                Cookies.set(sessionCookie, session + neverShow);
+                Cookies.set(permanentCookie, permanent + neverShow);
+            });
+
+            // Set up timeout and roadblock spawn function
+            setTimeout(function() {
+
+
+                // TODO: Start here - set up action
+
+                if (settings.onRoadblockAppear != null) {
+                    settings.onRoadblockAppear.call();
+                }
+            }, settings.waitTime);
+
         });
 
     }
