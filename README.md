@@ -1,3 +1,29 @@
+roadblock-js
+==========
+
+####What
+jQuery plugin to show a DIV after a certain amount of time on a site. The div will be shown X amount of times during a session (from when the user first accesses the site to when they close the browser) and Y amount of times total. There will also be a list of URL pathnames to ignore.
+
+####How
+Pick your level of customization:
+
+`$('.selector').roadblocker();`
+
+Default options.
+
+####Under The Hood
+
+When you access a page with Roadblocker on it, the script will:
+
+1. Set `display: none` on its selected element(s).
+2. Look for a `roadblocker-session` cookie. If one is found, check if `roadblocker-session.timesDisplayed >= options.timesPerSession` or `roadblocker-permanent.neverShow == true`. If either condition is met, `return`.
+3. Check if this location's pathname (`http://site-url.com/PATHNAME`) is present in the list of paths to ignore. If it is, `return`.
+4. Create a `roadblocker-session` cookie if none exists with value `timesDisplayed` set to 0.
+5. Create a `roadblocker-permanent` cookie if none exists with value `totalTimesDisplayed` set to 0 and `neverShow` set to `false`.
+6. `setTimeout` for `options.waitTime` ms, running `activateRoadblock` on complete.
+7. Call `activateRoadblock`. Increment `roadblocker-session.timesDisplayed` and `roadblocker-permanent.totalTimesDisplayed`. If `roadblocker-permanent.totalTimesDisplayed >= options.totalTimesToShow`, set `roadblocker-permanent.neverShow` to `true`.
+
+
 Roadblocker
 ==========
 
