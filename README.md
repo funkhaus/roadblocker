@@ -34,7 +34,12 @@ $('.selector').roadblocker({
     ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
     singleCloseButton: '.roadblock-close', // Selector for the element used to close the roadblock. Searches the roadblock's children first, then the rest of the document.
     permanentCloseButton: '.roadblock-permanent-hide', // Selector for the element used to prevent the roadblock from ever appearing again (ie, the 'sign up' button for a mailing list). Searches the roadblock's children first, then the rest of the document.
-    onRoadblockAppear: null // Function to call when roadblock appears
+    onShow: null, // Function to call when roadblock appears
+    onClose: null, // Function to call when user closes roadblock
+    log: false, // Whether or not roadblocker should log its exit logic
+    openClass: 'roadblocker-open', // Class to add to roadblock when it appears (removed when it is hidden)
+    closeClass: 'roadblocker-closed', // Class to add to roadblock when it is hidden
+    defaultDisplayToggle: true // If the roadblock should automatically show and hide itself via setting and removing display: none
 });
 ```
 

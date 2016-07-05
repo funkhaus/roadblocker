@@ -5,22 +5,27 @@
 
     $.fn.roadblocker = function(options, submitButton) {
 
-
-
         // Defaults
         var settings = $.extend({
             timesPerSession: 1,
             totalTimesToShow: 3,
             waitTime: 10000,
             ignorePaths: ['/'],
-            singleCloseButton: '.roadblock-close',
-            permanentCloseButton: '.roadblock-permanent-hide',
-            onRoadblockAppear: null
+            singleCloseButton: '.roadblocker-close',
+            permanentCloseButton: '.roadblocker-permanent-close',
+            onShow: null,
+            onClose: null,
+            log: false,
+            openClass: 'roadblocker-open',
+            closeClass: 'roadblocker-closed',
+            defaultDisplayToggle: true
         }, options);
 
         var permanentCookie = 'roadblocker-permanent';
+        var permanentCookieContent;
         var sessionCookie = 'roadblocker-session';
-        var timesDisplayed = 'timesDisplayed=';
+        var sessionCookieContent;
+        var timesDisplayed = 'timesDisplayed:';
         var neverShow = 'neverShow';
 
         return this.each(function() {
@@ -32,11 +37,17 @@
             // Look for roadblocker-session
             var session = Cookies.get(sessionCookie);
             if ( session != undefined ) {
+                // Cache session cookie content
+                sessionCookieContent = session.replace(sessionCookie + '=', '').replace(/;.*/, '');
+
                 // Has the roadblock been displayed enough times this session?
-                timesDisplayedThisSession = session.match(/timesDisplayed=(\d*)/)[1];
+                timesDisplayedThisSession = sessionCookieContent.match(/timesDisplayed:(\d*)/)[1];
                 timesDisplayedThisSession = parseInt(timesDisplayedThisSession);
-                // Also, does the session cookie have the 'neverShow' flag?
-                if (timesDisplayedThisSession >= settings.timesPerSession || session.includes(neverShow)) {
+
+                if (timesDisplayedThisSession >= settings.timesPerSession ) {
+                    if (settings.log) {
+                        console.log('Maximum times to show per session reached, exiting roadblocker...');
+                    }
                     return;
                 }
             }
@@ -44,7 +55,24 @@
             // Look for roadblocker-permanent
             var permanent = Cookies.get(permanentCookie);
             if ( permanent != undefined ) {
+                // Cache permanent cookie content
+                permanentCookieContent = permanent.replace(permanentCookie + '=', '').replace(/;.*/, '');
+
                 if ( permanent.includes(neverShow) ) {
+                    if (settings.log) {
+                        console.log('Permanent cookie has \'never show\' flag set, exiting roadblocker...');
+                    }
+                    return;
+                }
+
+                // Has the roadblock been displayed enough times over all time?
+                timesDisplayedAllTime = permanentCookieContent.match(/timesDisplayed:(\d*)/)[1];
+                timesDisplayedAllTime = parseInt(timesDisplayedAllTime);
+
+                if (timesDisplayedAllTime >= settings.totalTimesToShow ) {
+                    if (settings.log) {
+                        console.log('Maximum times to show over all time reached, exiting roadblocker...');
+                    }
                     return;
                 }
             }
@@ -53,50 +81,74 @@
             var pathname = location.pathname;
             for (var i = 0; i < settings.ignorePaths.length; i++) {
                 if ( settings.ignorePaths[i] == pathname ) {
+                    if (settings.log) {
+                        console.log('Path name matches a name in the ignorePaths list, exiting roadblocker...');
+                    }
                     return;
                 }
             }
 
-            // Create cookies if necessary
+            // Create cookies if necessary and cache their content
             if ( session == undefined ) {
                 session = Cookies.set(sessionCookie, timesDisplayed + '0');
+                sessionCookieContent = session.replace(sessionCookie + '=', '').replace(/;.*/, '');
             }
             if ( permanent == undefined ) {
-                permanent = Cookies.set(permanentCookie, timesDisplayed + '0');
+                permanent = Cookies.set(permanentCookie, timesDisplayed + '0', { expires: 3650 });
+                permanentCookieContent = permanent.replace(permanentCookie + '=', '').replace(/;.*/, '');
+            }
+
+            var closeButtonClicked = function(roadblock) {
+                var $roadblock = $(roadblock);
+                $roadblock.addClass(settings.closeClass);
+                $roadblock.removeClass(settings.openClass);
+
+                if (settings.defaultDisplayToggle) {
+                    $roadblock.css('display', 'none');
+                }
+
+                if ( typeof( settings.onClose ) == 'function' ) {
+                    settings.onClose.call(roadblock);
+                }
             }
 
             // Set up close button
             var $closeButton = $(this).children(settings.singleCloseButton);
             // Search DOM if child closeButton isn't found
             if ( ! $closeButton.length ) $closeButton = $(settings.singleCloseButton);
-            // Increment roadblocker-session and roadblocker-permanent counts on close button click
-            $closeButton.on('click', function() {
-                timesDisplayedThisSession++;
-                timesDisplayedAllTime++;
-                Cookies.set(sessionCookie, session.replace(/(timesDisplayed=\d)/, timesDisplayed + timesDisplayedThisSession));
-                Cookies.set(permanentCookie, permanent.replace(/(timesDisplayed=\d)/, timesDisplayed + timesDisplayedThisSession));
-            });
+            $closeButton.click(function() {
+                closeButtonClicked(this);
+            }.bind(this));
 
             // Set up permanent close button
             var $permanentClose = $(this).children(settings.permanentCloseButton);
             // Search DOM if child permanent close button isn't found
             if ( ! $permanentClose.length ) $permanentClose = $(settings.permanentCloseButton);
             // Add 'never-show' flag to cookies on permanentClose click
-            $permanentClose.on('click', function() {
-                Cookies.set(sessionCookie, session + neverShow);
-                Cookies.set(permanentCookie, permanent + neverShow);
-            });
+            $permanentClose.click(function() {
+                Cookies.set(sessionCookie, sessionCookieContent + neverShow);
+                Cookies.set(permanentCookie, permanentCookieContent + neverShow, { expires: 3650 });
+                closeButtonClicked(this);
+            }.bind(this));
 
             // Set up timeout and roadblock spawn function
             setTimeout(function() {
-
-
-                // TODO: Start here - set up action
-
-                if (settings.onRoadblockAppear != null) {
-                    settings.onRoadblockAppear.call();
+                if (settings.defaultDisplayToggle) {
+                    $(this).css('display', '');
                 }
-            }, settings.waitTime);
+
+                $(this).addClass(settings.openClass);
+
+                // Increment roadblocker-session and roadblocker-permanent counts when roadblock appears
+                timesDisplayedThisSession++;
+                timesDisplayedAllTime++;
+                Cookies.set(sessionCookie, sessionCookieContent.replace(/timesDisplayed:\d/, timesDisplayed + timesDisplayedThisSession));
+                Cookies.set(permanentCookie, permanentCookieContent.replace(/timesDisplayed:\d/, timesDisplayed + timesDisplayedThisSession), { expires: 3650 });
+
+                if (settings.onShow != null) {
+                    settings.onShow.call(this);
+                }
+            }.bind(this), settings.waitTime);
 
         });
 
