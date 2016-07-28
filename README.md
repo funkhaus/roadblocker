@@ -1,6 +1,8 @@
 roadblock-js
 ==========
 
+(Keep scrolling for roadblock-lite, which uses callbacks instead of markup!)
+
 ###What
 jQuery plugin to show a DIV after a certain amount of time on a site. The div will be shown X amount of times during a session (from when the user first accesses the site to when they close the browser) and Y amount of times total. There will also be a list of URL pathnames to ignore.
 
@@ -57,3 +59,21 @@ When you access a page with Roadblocker on it, the script will:
 6. `setTimeout` for `options.waitTime` ms, running the next step on complete.
 7. Set `$(roadblock).css('display', '')` if `defaultDisplayToggle` is on. Call `onShow` if set. Increment `roadblocker-session.timesDisplayed` and `roadblocker-permanent.totalTimesDisplayed`. If `roadblocker-permanent.totalTimesDisplayed >= options.totalTimesToShow`, set `roadblocker-permanent.neverShow` to `true`.
 8. Wait for the close-once or close-permanently buttons to be clicked and set the appropriate classes, fire the appropriate callbacks, etc. when clicked.
+
+###Roadblocker-Lite
+
+roadblocker-lite lets you focus on the callback functionality of Roadblocker without the markup.
+
+```javascript
+$('.selector').roadblocker({
+    timesPerSession: 1, // Maximum number of times to show roadblock during session
+    totalTimesToShow: 3, // Maxiumum number of times to show roadblock ever
+    waitTime: 10000, // How long to wait before roadblock action is triggered
+    ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
+    onShow: null, // Function to call when roadblock appears
+    onClose: null, // Function to call when user closes roadblock
+    log: false, // Whether or not roadblocker should log its exit logic
+});
+```
+
+You can also call `$('.selector').roadblocker('close-once');` to close a roadblock once and `[...].roadblocker('close-permanently');` to close it permanently!
