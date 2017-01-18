@@ -29,7 +29,7 @@ $('.selector').roadblocker({
     ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
     onShow: function(){ jQuery('body').addClass('roadblock-activated'); }, // Function to call when roadblock appears
     onClose: function(){ jQuery('body').removeClass('roadblock-activated'); }, // Function to call when user closes roadblock,
-    closeElement: null, // The element that triggers jQuery('body').roadblocker('close') when clicked
+    closeElement: null, // Selector string for the element that triggers jQuery('body').roadblocker('close') when clicked
     log: false, // Whether or not roadblocker should log its exit logic
 });
 ```
