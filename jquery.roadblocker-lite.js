@@ -1,3 +1,5 @@
+/* Roadblocker-lite 1.2 */
+
 (function($) {
 
     // Rolled-in version of js-cookie 2.1.2
@@ -5,7 +7,7 @@
 
     $.fn.roadblocker = function(options, onClose) {
 
-        var cb = null;
+        var callback = null;
 
         var cmd = null;
         if( typeof options == 'string' ){
@@ -14,7 +16,7 @@
         }
 
         if( typeof options == 'function' ){
-            cb = options;
+            callback = options;
             options = null;
         }
 
@@ -24,9 +26,14 @@
             totalTimesToShow: 3,
             waitTime: 10000,
             ignorePaths: ['/'],
-            onShow: cb,
-            onClose: onClose,
-            log: false,
+            onShow: callback || function(){
+                jQuery('body').addClass('roadblock-activated');
+            },
+            onClose: onClose || function(){
+                jQuery('body').removeClass('roadblock-activated');
+            },
+            closeElement: null,
+            log: false
         }, options);
 
         return this.each(function() {
@@ -84,7 +91,7 @@
             // Parse commands
             if( cmd != null ){
 
-                if (cmd == 'close-once') {
+                if (cmd == 'close-once' || cmd == 'close') {
                     if( $(this).data && typeof $(this).data.onClose == 'function' ){
                         $(this).data.onClose();
                     }
@@ -138,6 +145,13 @@
                     settings.onShow();
                 }
             }, settings.waitTime);
+
+            // Set up close trigger
+            if( settings.closeElement !== null ){
+                jQuery('body').on('click', settings.closeElement, function(){
+                    settings.onClose();
+                });
+            }
 
             return this;
 
