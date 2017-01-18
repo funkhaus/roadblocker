@@ -1,33 +1,7 @@
-###Roadblocker-Lite
-
-roadblocker-lite lets you focus on the callback functionality of Roadblocker without the markup.
-
-```javascript
-$('.selector').roadblocker({
-    timesPerSession: 1, // Maximum number of times to show roadblock during session
-    totalTimesToShow: 3, // Maxiumum number of times to show roadblock ever
-    waitTime: 10000, // How long to wait before roadblock action is triggered
-    ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
-    onShow: function(){ jQuery('body').addClass('roadblock-activated'); }, // Function to call when roadblock appears
-    onClose: function(){ jQuery('body').removeClass('roadblock-activated'); }, // Function to call when user closes roadblock,
-    closeElement: null, // The element that triggers roadblocker('close') when clicked
-    log: false, // Whether or not roadblocker should log its exit logic
-});
-```
-
-You can also call `$('.selector').roadblocker('close-once');` to close a roadblock once and `[...].roadblocker('close-permanently');` to close it permanently!
-
-roadblock-js
-==========
-
 ###What
-jQuery plugin to show a DIV after a certain amount of time on a site. The div will be shown X amount of times during a session (from when the user first accesses the site to when they close the browser) and Y amount of times total. There will also be a list of URL pathnames to ignore.
-
-Example (check the source code and your cookies!): http://sander.funkhaus.us/test/
+roadblocker is a jQuery plugin to trigger an action after a certain amount of time on a site. The action will be triggered X times during a session and Y times total. There will also be a list of URL pathnames to ignore - pages on the site that will never trigger the action.
 
 Definitions of terms:
-
-`roadblock` - the jQuery element that will appear when correct conditions are met.
 
 `session` - From the first time a `roadblocker-session` cookie is created until the user closes their browser.
 
@@ -39,40 +13,47 @@ Include jQuery first, then include jquery.roadblocker.js:
 <script src="path/to/roadblocker"></script>
 ```
 
-Then, pick your level of customization:
+Then call `roadblocker()` on any element(s) you want to hold roadblocker triggers. `body` is the most common container.
 
-####Default Options
+```javascript
+jQuery('body').roadblocker();
+```
 
-`$('.selector').roadblocker();`
-
-#### In-Depth Options
+####Options (defaults shown)
 
 ```javascript
 $('.selector').roadblocker({
     timesPerSession: 1, // Maximum number of times to show roadblock during session
     totalTimesToShow: 3, // Maxiumum number of times to show roadblock ever
-    waitTime: 10000, // How long to wait before roadblock action is triggered
+    waitTime: 10000, // How long, in ms, to wait before roadblock action is triggered
     ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
-    singleCloseButton: '.roadblock-close', // Selector for the element used to close the roadblock. Searches the roadblock's children first, then the rest of the document.
-    permanentCloseButton: '.roadblock-permanent-hide', // Selector for the element used to prevent the roadblock from ever appearing again (ie, the 'sign up' button for a mailing list). Searches the roadblock's children first, then the rest of the document.
-    onShow: null, // Function to call when roadblock appears
-    onClose: null, // Function to call when user closes roadblock
+    onShow: function(){ jQuery('body').addClass('roadblock-activated'); }, // Function to call when roadblock appears
+    onClose: function(){ jQuery('body').removeClass('roadblock-activated'); }, // Function to call when user closes roadblock,
+    closeElement: null, // The element that triggers jQuery('body').roadblocker('close') when clicked
     log: false, // Whether or not roadblocker should log its exit logic
-    openClass: 'roadblocker-open', // Class to add to roadblock when it appears (removed when it is hidden)
-    closeClass: 'roadblocker-closed', // Class to add to roadblock when it is hidden
-    defaultDisplayToggle: true // If the roadblock should automatically show and hide itself via setting and removing display: none
 });
+```
+
+####Commands
+```javascript
+$('.selector').roadblocker('close'); // Fire the onClose event on an initialized roadblock
+$('.selector').roadblocker('close-permanently'); // Fire the onClose event and never show the roadblock again
 ```
 
 ####Under The Hood
 
 When you access a page with Roadblocker on it, the script will:
 
-1. Set `display: none` on its selected element(s).
-2. Look for a `roadblocker-session` cookie. If one is found, check if `roadblocker-session.timesDisplayed >= options.timesPerSession` or `roadblocker-permanent.neverShow == true`. If either condition is met, `return`.
-3. Check if this location's pathname (`http://site-url.com/PATHNAME`) is present in the list of paths to ignore. If it is, `return`.
-4. Create a `roadblocker-session` cookie if none exists with value `timesDisplayed` set to 0.
-5. Create a `roadblocker-permanent` cookie if none exists with value `timesDisplayed` set to 0.
-6. `setTimeout` for `options.waitTime` ms, running the next step on complete.
-7. Set `$(roadblock).css('display', '')` if `defaultDisplayToggle` is on. Call `onShow` if set. Increment `roadblocker-session.timesDisplayed` and `roadblocker-permanent.totalTimesDisplayed`. If `roadblocker-permanent.totalTimesDisplayed >= options.totalTimesToShow`, set `roadblocker-permanent.neverShow` to `true`.
-8. Wait for the close-once or close-permanently buttons to be clicked and set the appropriate classes, fire the appropriate callbacks, etc. when clicked.
+1. Look for a `roadblocker-session` cookie. If one is found, check if `roadblocker-session.timesDisplayed >= options.timesPerSession` or `roadblocker-permanent.neverShow == true`. If either condition is met, `return`.
+1. Check if this location's pathname (`http://site-url.com/PATHNAME`) is present in the list of paths to ignore. If it is, `return`.
+1. Create a `roadblocker-session` cookie if none exists with value `timesDisplayed` set to 0.
+1. Create a `roadblocker-permanent` cookie if none exists with value `timesDisplayed` set to 0.
+1. `setTimeout` for `options.waitTime` ms, running the next step on complete.
+1. Call `onShow`. Increment `roadblocker-session.timesDisplayed` and `roadblocker-permanent.totalTimesDisplayed` cookies. If `roadblocker-permanent.totalTimesDisplayed >= options.totalTimesToShow`, set `roadblocker-permanent.neverShow` to `true`.
+1. Wait for the close-once or close-permanently buttons to be clicked and call `onClose`.
+
+-------
+
+Version 1.2.1
+
+http://funkhaus.us
