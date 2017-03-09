@@ -38,6 +38,7 @@ $('.selector').roadblocker({
 ```javascript
 $('.selector').roadblocker('close'); // Fire the onClose event on an initialized roadblock
 $('.selector').roadblocker('close-permanently'); // Fire the onClose event and never show the roadblock again
+$('.selector').roadblocker('cancel'); // Cancel the countdown timer and prevent `onShow` from firing automatically
 ```
 
 ####Under The Hood
@@ -54,6 +55,6 @@ When you access a page with Roadblocker on it, the script will:
 
 -------
 
-Version 1.2.1
+Version 1.3
 
 http://funkhaus.us

@@ -1,4 +1,4 @@
-/* Roadblocker 1.2.1 */
+/* Roadblocker 1.3 */
 
 (function($) {
 
@@ -106,6 +106,14 @@
                     }
                     return this;
                 }
+
+                if( command == 'cancel' ){
+                    if( $(this).data('roadblocker-timer') ){
+                        clearTimeout( $(this).data('roadblocker-timer') );
+                        console.log('Timeout cleared');
+                        $(this).data('roadblocker-timer', null);
+                    }
+                }
             }
 
             // Check pathname
@@ -134,7 +142,7 @@
             }
 
             // Set up timeout and roadblock spawn function
-            setTimeout(function() {
+            var timer = setTimeout(function() {
                 // Increment roadblocker-session and roadblocker-permanent counts when roadblock appears
                 timesDisplayedThisSession++;
                 timesDisplayedAllTime++;
@@ -145,6 +153,9 @@
                     settings.onShow();
                 }
             }, settings.waitTime);
+
+            // Save to element
+            $(this).data('roadblocker-timer', timer);
 
             // Set up close trigger
             if( settings.closeElement !== null ){
