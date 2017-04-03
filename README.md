@@ -1,11 +1,11 @@
-###What
+### What
 roadblocker is a jQuery plugin to trigger an action after a certain amount of time on a site. The action will be triggered X times during a session and Y times total. There will also be a list of URL pathnames to ignore - pages on the site that will never trigger the action.
 
 Definitions of terms:
 
 `session` - From the first time a `roadblocker-session` cookie is created until the user closes their browser.
 
-###How
+### How
 Include jQuery first, then include jquery.roadblocker.js:
 
 ```html
@@ -19,7 +19,7 @@ Then call `roadblocker()` on any element(s) you want to hold roadblocker trigger
 jQuery('body').roadblocker();
 ```
 
-####Options (defaults shown)
+#### Options (defaults shown)
 
 ```javascript
 $('.selector').roadblocker({
@@ -35,14 +35,14 @@ $('.selector').roadblocker({
 });
 ```
 
-####Commands
+#### Commands
 ```javascript
 $('.selector').roadblocker('close'); // Fire the onClose event on an initialized roadblock
 $('.selector').roadblocker('close-permanently'); // Fire the onClose event and never show the roadblock again
 $('.selector').roadblocker('cancel'); // Cancel the countdown timer and prevent `onShow` from firing automatically
 ```
 
-####Under The Hood
+#### Under The Hood
 
 When you access a page with Roadblocker on it, the script will:
 
