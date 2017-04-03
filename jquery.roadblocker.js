@@ -1,4 +1,4 @@
-/* Roadblocker 1.3 */
+/* Roadblocker 1.4 */
 
 (function($) {
 
@@ -25,7 +25,8 @@
             timesPerSession: 1,
             totalTimesToShow: 3,
             waitTime: 10000,
-            ignorePaths: ['/'],
+            ignorePaths: [],
+            onlyPaths: [],
             onShow: callback || function(){
                 jQuery('body').addClass('roadblock-activated');
             },
@@ -118,10 +119,21 @@
 
             // Check pathname
             var pathname = location.pathname;
+            // Ignoring paths
             for (var i = 0; i < settings.ignorePaths.length; i++) {
                 if ( settings.ignorePaths[i] == pathname ) {
                     if (settings.log) {
+                        console.log(settings);
                         console.log('Path name matches a name in the ignorePaths list, exiting roadblocker...');
+                    }
+                    return this;
+                }
+            }
+            // Only paths
+            for( var i = 0; i < settings.onlyPaths.length; i++ ){
+                if( settings.onlyPaths[i] != pathname ){
+                    if (settings.log) {
+                        console.log('Path name does not match a name in the onlyPaths list, exiting roadblocker...');
                     }
                     return this;
                 }

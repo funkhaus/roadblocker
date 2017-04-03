@@ -26,7 +26,8 @@ $('.selector').roadblocker({
     timesPerSession: 1, // Maximum number of times to show roadblock during session
     totalTimesToShow: 3, // Maxiumum number of times to show roadblock ever (technically maximum number of times to show roadblock over 10 years)
     waitTime: 10000, // How long, in ms, to wait before roadblock action is triggered
-    ignorePaths: ['/'], // Relative paths to be ignored by roadblock. The default, '/', refers to the homepage of the site
+    ignorePaths: [], // Relative paths to be ignored by roadblock. For example, '/' for the home page, or '/posts/' for a posts page.
+    onlyPaths: [], // Relative paths to show the roadblock on, excluding unlisted paths. Same format as ignorPaths.
     onShow: function(){ jQuery('body').addClass('roadblock-activated'); }, // Function to call when roadblock appears
     onClose: function(){ jQuery('body').removeClass('roadblock-activated'); }, // Function to call when user closes roadblock,
     closeElement: null, // Selector string for the element that triggers jQuery('body').roadblocker('close') when clicked
@@ -55,6 +56,6 @@ When you access a page with Roadblocker on it, the script will:
 
 -------
 
-Version 1.3
+Version 1.4
 
 http://funkhaus.us
